@@ -1,4 +1,8 @@
-import Link from "next/link";
+"use client";
+
+import { useState, useEffect } from 'react';
+import Loading from '../loading'; // Use the global loading spinner
+import Link from 'next/link';
 
 async function fetchProductDetails(id) {
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products/${id}`);
@@ -8,18 +12,39 @@ async function fetchProductDetails(id) {
   return response.json();
 }
 
-export default async function ProductDetails({ params }) {
+export default function ProductDetails({ params }) {
   const { id } = params;
-  
-  let product;
-  try {
-    product = await fetchProductDetails(id);
-  } catch (error) {
-    return <div>Failed to load product. Please try again later.</div>;
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadProductDetails = async () => {
+      setLoading(true); // Set loading to true while fetching
+      setError(null);
+      try {
+        const productData = await fetchProductDetails(id);
+        setProduct(productData);
+      } catch (err) {
+        setError('Failed to load product details. Please try again later.');
+      } finally {
+        setLoading(false); // Disable loading after fetching
+      }
+    };
+    loadProductDetails();
+  }, [id]);
+
+  if (loading) {
+    return <Loading />; // Use the global loading spinner while data is being fetched
+  }
+
+  if (error) {
+    return <div>{error}</div>;
   }
 
   return (
     <div className="max-w-screen-lg mx-auto p-6">
+      {/* Display product details */}
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           <img
