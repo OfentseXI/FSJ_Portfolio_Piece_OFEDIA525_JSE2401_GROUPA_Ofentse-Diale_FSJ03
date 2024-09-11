@@ -8,8 +8,8 @@ async function fetchProducts(page = 1, limit = 20) {
   return response.json();
 }
 
-import ProductGrid from './components/productGrid';
-import Pagination from './components/pagination';
+import ProductGrid from './components/ProductGrid';
+import Pagination from './components/Pagination';
 
 export default async function ProductsPage({ searchParams }) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
