@@ -1,4 +1,3 @@
-
 async function fetchProducts(page = 1, limit = 20) {
   const skip = (page - 1) * limit;
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products?limit=${limit}&skip=${skip}`);
