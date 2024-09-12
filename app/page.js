@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProductGrid from './components/ProductGrid';
 import Pagination from './components/Pagination';
 import Loading from './loading'; // Use the global loading spinner
+import ErrorPage from './components/ErrorPage'; // Import the ErrorPage component
 
 async function fetchProducts(page = 1, limit = 20) {
   const skip = (page - 1) * limit;
@@ -41,7 +42,7 @@ export default function ProductsPage({ searchParams }) {
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <ErrorPage message={error} />; // Display custom error page when there's an error
   }
 
   return (
