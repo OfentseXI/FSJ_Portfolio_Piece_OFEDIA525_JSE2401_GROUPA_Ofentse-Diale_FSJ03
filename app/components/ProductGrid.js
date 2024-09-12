@@ -20,9 +20,9 @@ function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-      <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden relative">
+      <div className="relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="absolute inset-0 flex items-center justify-center">
             {/* Loading spinner */}
             <svg
               className="animate-spin h-8 w-8 text-gray-500"
@@ -50,7 +50,7 @@ function ProductCard({ product }) {
         <img
           src={product.images[0]}
           alt={product.title}
-          className={`object-cover object-center w-full h-full transition-opacity duration-500 ${
+          className={`object-cover w-full h-full transition-opacity duration-500 ${
             isLoading ? 'opacity-0' : 'opacity-100'
           }`}
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
