@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Loading from '../loading'; // Use the global loading spinner
-import Link from 'next/link';
+import ErrorPage from '@/app/components/ErrorPage'; // Import the reusable error component
 
 async function fetchProductDetails(id) {
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products/${id}`);
@@ -39,7 +39,7 @@ export default function ProductDetails({ params }) {
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <ErrorPage message={error} />; // Use the reusable custom error component
   }
 
   return (
