@@ -64,8 +64,16 @@ export default function ProductDetails({ params }) {
           <div className="p-6 sm:p-10">
             <div className="flex flex-col lg:flex-row gap-10">
               {/* Image Section */}
-              <div className="flex-1">
+              <div className="flex-1 relative">
+            
                 <div className="relative w-full h-[400px] overflow-hidden rounded-lg bg-gray-100">
+                <span
+                    className={`absolute top-2 left-2 px-3 py-1 text-sm font-semibold text-white rounded-md ${
+                      product.stock > 0 ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  >
+                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                </span>
                   <img
                     className="object-contain w-full h-full"
                     src={product.images[currentImageIndex]}
