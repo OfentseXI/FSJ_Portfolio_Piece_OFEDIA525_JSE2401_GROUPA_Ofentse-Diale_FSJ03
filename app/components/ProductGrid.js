@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function ProductGrid({ products }) {
@@ -17,9 +17,32 @@ export default function ProductGrid({ products }) {
 
 function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(true); // State to manage image loading
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image
+  const [isHovered, setIsHovered] = useState(false); // State to track hover
+
+  // Effect to cycle through images on hover
+  useEffect(() => {
+    let interval;
+    if (isHovered && product.images.length > 1) {
+      interval = setInterval(() => {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 2000); // Change image every 2 seconds
+    } else {
+      setCurrentImageIndex(0); // Reset to the first image when not hovered
+    }
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isHovered, product.images]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -48,9 +71,9 @@ function ProductCard({ product }) {
         )}
 
         <img
-          src={product.images[0]}
+          src={product.images[currentImageIndex]}
           alt={product.title}
-          className={`object-cover w-full h-full transition-opacity duration-500 ${
+          className={`object-cover w-full h-full transition-all duration-700 ease-in-out transform ${
             isLoading ? 'opacity-0' : 'opacity-100'
           }`}
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
