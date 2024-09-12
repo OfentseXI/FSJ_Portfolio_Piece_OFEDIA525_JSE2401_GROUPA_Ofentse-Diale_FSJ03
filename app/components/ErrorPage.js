@@ -1,6 +1,8 @@
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function ErrorPage({ message }) {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center bg-gray-50 p-6">
       <h1 className="text-4xl font-bold text-red-500 mb-4">Oops! Something went wrong 😵</h1>
@@ -10,11 +12,12 @@ export default function ErrorPage({ message }) {
         src="https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif"
         alt="Error gif"
       />
-      <Link href="/products">
-        <a className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-          Back to Products
-        </a>
-      </Link>
+      <button 
+        onClick={() => router.back()} 
+        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+      >
+        Back to Previous Page
+      </button>
     </div>
   );
 }
