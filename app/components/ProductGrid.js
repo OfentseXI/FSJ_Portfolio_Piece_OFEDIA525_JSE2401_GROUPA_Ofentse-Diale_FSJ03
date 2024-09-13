@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function ProductGrid({ products }) {
@@ -18,24 +18,19 @@ export default function ProductGrid({ products }) {
 function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(true); // State to manage image loading
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image
-  const [isHovered, setIsHovered] = useState(false); // State to track hover
+  const [isHovered, setIsHovered] = useState(false); // Track hover state for showing controls
 
-  // Effect to cycle through images on hover
-  useEffect(() => {
-    let interval;
-    if (isHovered && product.images.length > 1) {
-      interval = setInterval(() => {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
-        );
-      }, 2000); // Change image every 2 seconds
-    } else {
-      setCurrentImageIndex(0); // Reset to the first image when not hovered
-    }
-    return () => {
-      clearInterval(interval);
-    };
-  }, [isHovered, product.images]);
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+    );
+  };
 
   return (
     <div
@@ -78,7 +73,57 @@ function ProductCard({ product }) {
           }`}
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
         />
+
+        {/* Conditionally show arrows when there are multiple images and the product is hovered */}
+        {isHovered && product.images.length > 1 && (
+          <>
+            {/* Previous Image Button */}
+            <button
+              onClick={handlePreviousImage}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            >
+              {/* Left Arrow SVG */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-6 h-6 text-gray-800"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+
+            {/* Next Image Button */}
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            >
+              {/* Right Arrow SVG */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="w-6 h-6 text-gray-800"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
+
       <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
           {product.title}
