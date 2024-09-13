@@ -158,7 +158,7 @@ export default function ProductDetails({ params }) {
                   </span>
                   <span className="text-gray-600">Rated: {product.rating} out of 5</span>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Stock: {product.stock}</p>
+                <p className="text-gray-600 mt-2">Stock: {product.stock}</p>
 
                 <div className="mt-6">
                   <h2 className="text-lg font-semibold text-gray-900">Tags:</h2>

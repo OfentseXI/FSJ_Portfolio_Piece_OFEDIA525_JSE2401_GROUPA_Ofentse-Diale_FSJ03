@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * ErrorPage component to display an error message and provide options to either try again or go back.
+ *
+ * @param {Object} props - The component props.
+ * @param {string} props.message - The error message to display.
+ * @returns {JSX.Element} The rendered component.
+ */
 export default function ErrorPage({ message }) {
   const [firstError, setFirstError] = useState(true); // State to track if it's the first error
 
-  // Run this only once to check if it's the first error
+  /**
+   * Effect to check if an error has occurred before and set state accordingly.
+   * Runs only once when the component is mounted.
+   */
   useEffect(() => {
     const errorOccurredBefore = sessionStorage.getItem('errorOccurred');
     if (errorOccurredBefore) {
@@ -13,10 +23,16 @@ export default function ErrorPage({ message }) {
     }
   }, []);
 
+  /**
+   * Reloads the page to attempt to fetch the data again.
+   */
   const handleTryAgain = () => {
     window.location.reload(); // Reload the page to try fetching the data again
   };
 
+  /**
+   * Navigates the user back to the previous page in the browser history.
+   */
   const handleBack = () => {
     window.history.back(); // Go back to the previous page
   };

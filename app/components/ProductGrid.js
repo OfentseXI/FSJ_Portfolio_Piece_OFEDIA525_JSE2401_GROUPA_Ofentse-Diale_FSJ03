@@ -1,11 +1,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+/**
+ * ProductGrid component to display a grid of products.
+ *
+ * @param {Object} props - The component props.
+ * @param {Array} props.products - Array of product objects to display.
+ * @returns {JSX.Element} The rendered ProductGrid component.
+ */
 export default function ProductGrid({ products }) {
   return (
     <div className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {/* Render a ProductCard for each product */}
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -15,17 +23,30 @@ export default function ProductGrid({ products }) {
   );
 }
 
+/**
+ * ProductCard component to display individual product details with image carousel.
+ *
+ * @param {Object} props - The component props.
+ * @param {Object} props.product - The product object containing details and images.
+ * @returns {JSX.Element} The rendered ProductCard component.
+ */
 function ProductCard({ product }) {
   const [isLoading, setIsLoading] = useState(true); // State to manage image loading
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image
-  const [isHovered, setIsHovered] = useState(false); // Track hover state for showing controls
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index
+  const [isHovered, setIsHovered] = useState(false); // State to track hover status for controls visibility
 
+  /**
+   * Handler function to move to the next image in the carousel.
+   */
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
+  /**
+   * Handler function to move to the previous image in the carousel.
+   */
   const handlePreviousImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
@@ -35,8 +56,8 @@ function ProductCard({ product }) {
   return (
     <div
       className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsHovered(true)} // Show controls on hover
+      onMouseLeave={() => setIsHovered(false)} // Hide controls when not hovered
     >
       <div className="relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
@@ -74,7 +95,7 @@ function ProductCard({ product }) {
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
         />
 
-        {/* Conditionally show arrows when there are multiple images and the product is hovered */}
+        {/* Conditionally show carousel navigation buttons if there are multiple images and product is hovered */}
         {isHovered && product.images.length > 1 && (
           <>
             {/* Previous Image Button */}

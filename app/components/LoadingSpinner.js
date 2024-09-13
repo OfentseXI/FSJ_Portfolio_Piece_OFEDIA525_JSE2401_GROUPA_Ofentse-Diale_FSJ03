@@ -1,3 +1,8 @@
+/**
+ * LoadingSpinner component to display a spinner while content is loading.
+ *
+ * @returns {JSX.Element} The rendered loading spinner component.
+ */
 export default function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center h-screen">
