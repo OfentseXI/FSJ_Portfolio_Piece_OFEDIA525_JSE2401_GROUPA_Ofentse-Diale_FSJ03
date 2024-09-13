@@ -90,7 +90,7 @@ function ProductCard({ product }) {
         <img
           src={product.images[currentImageIndex]}
           alt={product.title}
-          className={`object-cover w-full h-full transition-all duration-700 ease-in-out transform ${
+          className={`object-contain w-full h-full transition-all duration-700 ease-in-out transform ${
             isLoading ? 'opacity-0' : 'opacity-100'
           }`}
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
