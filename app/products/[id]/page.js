@@ -128,7 +128,7 @@ export default function ProductDetails({ params }) {
                   <span className="text-yellow-400">
                     {Array(Math.round(product.rating?.rate || 0)).fill('★').join('')}
                   </span>
-                  <span className="text-gray-600 ml-2">({product.rating})</span>
+                  <span className="text-gray-600">Rated: {product.rating} out of 5</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">Stock: {product.stock}</p>
 
