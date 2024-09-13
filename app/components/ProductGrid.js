@@ -60,7 +60,7 @@ function ProductCard({ product }) {
       onMouseEnter={() => setIsHovered(true)} // Show controls on hover
       onMouseLeave={() => setIsHovered(false)} // Hide controls when not hovered
     >
-      <div className="relative w-full h-64 flex items-center justify-center bg-gray-100">
+      <Link href={`/products/${product.id}`} className="block relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             {/* Loading spinner */}
@@ -95,40 +95,41 @@ function ProductCard({ product }) {
           }`}
           onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
         />
+      </Link>
 
-        {/* Conditionally show carousel navigation buttons if there are multiple images and product is hovered */}
-        {isHovered && product.images.length > 1 && (
-          <>
-            {/* Previous Image Button */}
-            <button
-              onClick={handlePreviousImage}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+      {/* Conditionally show carousel navigation buttons if there are multiple images and product is hovered */}
+      {isHovered && product.images.length > 1 && (
+        <>
+          {/* Previous Image Button */}
+          <button
+            onClick={handlePreviousImage}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+          >
+            {/* Left Arrow SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-6 h-6 text-gray-800"
             >
-              {/* Left Arrow SVG */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 text-gray-800"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-            </button>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 19.5L8.25 12l7.5-7.5"
+              />
+            </svg>
+          </button>
 
-            {/* Next Image Button */}
-            <button
-              onClick={handleNextImage}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
-            >
-              {/* Right Arrow SVG */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
+          {/* Next Image Button */}
+          <button
+            onClick={handleNextImage}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+          >
+            {/* Right Arrow SVG */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
@@ -141,15 +142,16 @@ function ProductCard({ product }) {
                   d="M8.25 4.5l7.5 7.5-7.5 7.5"
                 />
               </svg>
-            </button>
-          </>
-        )}
-      </div>
+          </button>
+        </>
+      )}
 
       <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-          {product.title}
-        </h2>
+        <Link href={`/products/${product.id}`}>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+            {product.title}
+          </h2>
+        </Link>
         <p className="text-xl font-bold text-indigo-600 mb-4">${product.price}</p>
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
