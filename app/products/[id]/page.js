@@ -69,7 +69,7 @@ export default function ProductDetails({ params }) {
                 <div className="relative w-full h-[400px] overflow-hidden rounded-lg bg-gray-100">
                 <span
                     className={`absolute top-2 left-2 px-3 py-1 text-sm font-semibold text-white rounded-md ${
-                      product.stock > 0 ? "bg-green-500" : "bg-red-500"
+                      product.stock > 0 ? "bg-indigo-600" : "bg-red-500"
                     }`}
                   >
                     {product.stock > 0 ? "In Stock" : "Out of Stock"}
@@ -81,13 +81,13 @@ export default function ProductDetails({ params }) {
                   />
                   <button
                     onClick={handlePreviousImage}
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition text-black"
                   >
                     &larr;
                   </button>
                   <button
                     onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition text-black"
                   >
                     &rarr;
                   </button>
