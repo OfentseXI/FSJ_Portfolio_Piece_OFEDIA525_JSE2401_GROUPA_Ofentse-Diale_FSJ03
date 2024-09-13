@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Loading from '../loading';
-import ErrorPage from '@/app/components/ErrorPage';
+import Loading from '@/app/loading';
 import Link from 'next/link';
+import ErrorPage from '@/app/error'; 
 
+/**
+ * Fetch product details from the API.
+ *
+ * @param {string} id - The ID of the product to fetch.
+ * @returns {Promise<Object>} A promise that resolves to the product details.
+ * @throws {Error} Throws an error if the fetch request fails.
+ */
 async function fetchProductDetails(id) {
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products/${id}`);
   if (!response.ok) {
@@ -13,44 +20,61 @@ async function fetchProductDetails(id) {
   return response.json();
 }
 
+/**
+ * ProductDetails component to display detailed information about a single product.
+ *
+ * @param {Object} props - The component props.
+ * @param {Object} props.params - The parameters from the URL.
+ * @param {string} props.params.id - The ID of the product to display details for.
+ * @returns {JSX.Element} The rendered ProductDetails component.
+ */
 export default function ProductDetails({ params }) {
   const { id } = params;
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image
-  const [reviewsVisible, setReviewsVisible] = useState(false);
+  const [product, setProduct] = useState(null); // State to store product details
+  const [loading, setLoading] = useState(true); // State to manage loading status
+  const [error, setError] = useState(null); // State to manage error status
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index
+  const [reviewsVisible, setReviewsVisible] = useState(false); // State to toggle reviews visibility
 
+  /**
+   * Fetch product details when the component mounts or the product ID changes.
+   */
   useEffect(() => {
     const loadProductDetails = async () => {
-      setLoading(true);
-      setError(null);
+      setLoading(true); // Set loading to true while fetching data
+      setError(null); // Reset error state before fetching
       try {
         const productData = await fetchProductDetails(id);
-        setProduct(productData);
+        setProduct(productData); // Update product state with fetched data
       } catch (err) {
-        setError('Failed to load product details. Please try again later.');
+        setError('Failed to load product details. Please try again later.'); // Update error state on failure
       } finally {
-        setLoading(false);
+        setLoading(false); // Disable loading state after fetching is complete
       }
     };
     loadProductDetails();
-  }, [id]);
+  }, [id]); // Dependency array to refetch product details when the ID changes
 
   if (loading) {
-    return <Loading />;
+    return <Loading />; // Show loading spinner while data is being fetched
   }
 
   if (error) {
-    return <ErrorPage message={error} />;
+    return <ErrorPage message={error} />; // Show error page if there's an error
   }
 
+  /**
+   * Handle image navigation to the next image.
+   */
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
+  /**
+   * Handle image navigation to the previous image.
+   */
   const handlePreviousImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
@@ -65,60 +89,59 @@ export default function ProductDetails({ params }) {
             <div className="flex flex-col lg:flex-row gap-10">
               {/* Image Section */}
               <div className="flex-1 relative">
-            
                 <div className="relative w-full h-[400px] overflow-hidden rounded-lg bg-gray-100">
-                <span
+                  <span
                     className={`absolute top-2 left-2 px-3 py-1 text-m text-white rounded-md ${
                       product.stock > 0 ? "bg-indigo-600" : "bg-red-500"
                     }`}
                   >
                     {product.stock > 0 ? "In Stock" : "Out of Stock"}
-                </span>
+                  </span>
                   <img
                     className="object-contain w-full h-full"
                     src={product.images[currentImageIndex]}
                     alt={product.title}
                   />
-            <button
-              onClick={handlePreviousImage}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
-            >
-              {/* Left Arrow SVG */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 text-gray-800"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={handleNextImage}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
-            >
-              {/* Right Arrow SVG */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 text-gray-800"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </button>
+                  <button
+                    onClick={handlePreviousImage}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                  >
+                    {/* Left Arrow SVG */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-6 h-6 text-gray-800"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 19.5L8.25 12l7.5-7.5"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                  >
+                    {/* Right Arrow SVG */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="w-6 h-6 text-gray-800"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                      />
+                    </svg>
+                  </button>
                 </div>
 
                 {product.images.length > 1 && (
