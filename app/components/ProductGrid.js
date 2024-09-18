@@ -1,53 +1,108 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-/**
- * ProductGrid component to display a grid of products.
- *
- * @param {Object} props - The component props.
- * @param {Array} props.products - Array of product objects to display.
- * @returns {JSX.Element} The rendered ProductGrid component.
- */
 export default function ProductGrid({ products }) {
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+
+  // Search, Sort, and Filter Products
+  useEffect(() => {
+    let updatedProducts = [...products];
+
+    // Search
+    if (searchQuery) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by Category
+    if (categoryFilter) {
+      updatedProducts = updatedProducts.filter(
+        product => product.category === categoryFilter
+      );
+    }
+
+    // Sort
+    if (sortOption === 'price-asc') {
+      updatedProducts.sort((a, b) => a.price - b.price);
+    } else if (sortOption === 'price-desc') {
+      updatedProducts.sort((a, b) => b.price - a.price);
+    } else if (sortOption === 'name-asc') {
+      updatedProducts.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortOption === 'name-desc') {
+      updatedProducts.sort((a, b) => b.title.localeCompare(a.title));
+    }
+
+    setFilteredProducts(updatedProducts);
+  }, [searchQuery, sortOption, categoryFilter, products]);
+
   return (
     <div className="bg-gray-50 py-12">
+      {/* Search, Sort, and Filter Controls */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="p-2 border border-gray-300 rounded"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select
+            className="p-2 border border-gray-300 rounded"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="">Sort by</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name-asc">Name: A to Z</option>
+            <option value="name-desc">Name: Z to A</option>
+          </select>
+          <select
+            className="p-2 border border-gray-300 rounded"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            {/* Add more categories as needed */}
+          </select>
+        </div>
+      </div>
+
+      {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {/* Render a ProductCard for each product */}
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <p>No products found.</p>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-/**
- * ProductCard component to display individual product details with image carousel.
- *
- * @param {Object} props - The component props.
- * @param {Object} props.product - The product object containing details and images.
- * @returns {JSX.Element} The rendered ProductCard component.
- */
 function ProductCard({ product }) {
-  const [isLoading, setIsLoading] = useState(true); // State to manage image loading
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index
-  const [isHovered, setIsHovered] = useState(false); // State to track hover status for controls visibility
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
-  /**
-   * Handler function to move to the next image in the carousel.
-   */
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
-  /**
-   * Handler function to move to the previous image in the carousel.
-   */
   const handlePreviousImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
@@ -57,8 +112,8 @@ function ProductCard({ product }) {
   return (
     <div
       className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-      onMouseEnter={() => setIsHovered(true)} // Show controls on hover
-      onMouseLeave={() => setIsHovered(false)} // Hide controls when not hovered
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Link href={`/products/${product.id}`} className="block relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
@@ -90,22 +145,17 @@ function ProductCard({ product }) {
         <img
           src={product.images[currentImageIndex]}
           alt={product.title}
-          className={`object-contain w-full h-full transition-all duration-700 ease-in-out transform ${
-            isLoading ? 'opacity-0' : 'opacity-100'
-          }`}
-          onLoad={() => setIsLoading(false)} // Hide spinner when image is loaded
+          className={`object-contain w-full h-full transition-all duration-700 ease-in-out transform ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+          onLoad={() => setIsLoading(false)}
         />
       </Link>
 
-      {/* Conditionally show carousel navigation buttons if there are multiple images and product is hovered */}
       {isHovered && product.images.length > 1 && (
         <>
-          {/* Previous Image Button */}
           <button
             onClick={handlePreviousImage}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
-            {/* Left Arrow SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -122,26 +172,24 @@ function ProductCard({ product }) {
             </svg>
           </button>
 
-          {/* Next Image Button */}
           <button
             onClick={handleNextImage}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
-            {/* Right Arrow SVG */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="w-6 h-6 text-gray-800"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-6 h-6 text-gray-800"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+              />
+            </svg>
           </button>
         </>
       )}
