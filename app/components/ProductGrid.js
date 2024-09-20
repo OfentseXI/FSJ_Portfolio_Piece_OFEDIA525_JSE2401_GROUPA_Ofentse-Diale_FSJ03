@@ -53,7 +53,7 @@ export default function ProductGrid({ products }) {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <select
-            className="p-2 border border-gray-300 rounded"
+            className="p-2 border-2 border-gray-300 rounded text-black"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
           >
@@ -64,7 +64,7 @@ export default function ProductGrid({ products }) {
             <option value="name-desc">Name: Z to A</option>
           </select>
           <select
-            className="p-2 border border-gray-300 rounded"
+            className="p-2 border-2 border-gray-300 rounded text-black"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
@@ -202,7 +202,7 @@ function ProductCard({ product }) {
         </Link>
         <p className="text-xl font-bold text-indigo-600 mb-4">${product.price}</p>
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
+          <span className="inline-flex items-center rounded bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
             {product.category}
           </span>
           <Link
