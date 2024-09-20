@@ -3,6 +3,7 @@
 import './globals.css';
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function RootLayout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,14 +15,15 @@ export default function RootLayout({ children }) {
           <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <div className="text-lg font-bold">
-                <Image src="/myStore.png" alt="myStore logo" width={60} height={60}/>
+                <Image src="/myStore.png" alt="myStore logo" width={60} height={60} />
               </div>
+
               {/* Desktop Menu */}
               <div className="hidden md:flex space-x-6">
-                <a href="#" className="hover:text-gray-300">Home</a>
-                <a href="#" className="hover:text-gray-300">Products</a>
-                <a href="#" className="hover:text-gray-300">About</a>
-                <a href="#" className="hover:text-gray-300">Contact</a>
+                <Link href="/" className="hover:text-gray-300">Home</Link>
+                <Link href="/products" className="hover:text-gray-300">Products</Link>
+                <Link href="/404" className="hover:text-gray-300">About</Link>
+                <Link href="/404" className="hover:text-gray-300">Contact</Link>
               </div>
 
               {/* Hamburger Menu Icon (Visible on Mobile) */}
@@ -49,10 +51,10 @@ export default function RootLayout({ children }) {
             {/* Mobile Menu (Visible when the hamburger icon is clicked) */}
             {isMenuOpen && (
               <div className="md:hidden space-y-4 mt-4">
-                <a href="#" className="block hover:text-gray-300">Home</a>
-                <a href="#" className="block hover:text-gray-300">Products</a>
-                <a href="#" className="block hover:text-gray-300">About</a>
-                <a href="#" className="block hover:text-gray-300">Contact</a>
+                <Link href="/" className="block hover:text-gray-300">Home</Link>
+                <Link href="/products" className="block hover:text-gray-300">Products</Link>
+                <Link href="/404" className="block hover:text-gray-300">About</Link>
+                <Link href="/404" className="block hover:text-gray-300">Contact</Link>
               </div>
             )}
           </nav>
