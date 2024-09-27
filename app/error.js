@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 /**
  * ErrorPage component to display an error message and provide options to either try again or go back.
@@ -31,13 +32,6 @@ export default function ErrorPage({ message }) {
     window.location.reload(); // Reload the page to try fetching the data again
   };
 
-  /**
-   * Navigates the user back to the previous page in the browser history.
-   */
-  const handleBack = () => {
-    window.history.back(); // Go back to the previous page
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center bg-gray-50 p-6">
       <h1 className="text-4xl font-bold text-red-500 mb-4">Oops! Something went wrong 😵</h1>
@@ -50,12 +44,11 @@ export default function ErrorPage({ message }) {
       />
       
       {/* Back to Previous Page Button */}
-      <button
-        onClick={handleBack}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4"
-      >
-        Back to Previous Page
-      </button>
+      <Link href="/" passHref className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4">
+        
+          Back to Home Page
+        
+      </Link>
 
       {/* Try Again Button (Visible only if it's the first error) */}
       {firstError && (

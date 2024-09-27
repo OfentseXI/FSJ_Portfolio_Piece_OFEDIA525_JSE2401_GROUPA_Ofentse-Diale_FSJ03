@@ -1,23 +1,30 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ProductGrid({ products }) {
+export default function ProductGrid({ products, initialSearchTerm }) {
+  const searchParams = useSearchParams;
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [sortOption, setSortOption] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+
+  const router = useRouter();
 
   // Search, Sort, and Filter Products
   useEffect(() => {
     let updatedProducts = [...products];
 
     // Search
-    if (searchQuery) {
-      updatedProducts = updatedProducts.filter(product =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+   const handleSearch = () => {
+    const params = new URLSearchParams(searchParams);
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    } else {params.delete("search");  
+    } params.set("page", "1");
+    router.push(`/?${params.toString()}`);
+   };
 
     // Filter by Category
     if (categoryFilter) {
@@ -38,20 +45,26 @@ export default function ProductGrid({ products }) {
     }
 
     setFilteredProducts(updatedProducts);
-  }, [searchQuery, sortOption, categoryFilter, products]);
+  }, [searchTerm, sortOption, categoryFilter, products]);
 
   return (
     <div className="bg-gray-50 py-12">
       {/* Search, Sort, and Filter Controls */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
         <div className="flex space-x-4">
+          <form
+          onChange={(e) => {
+            handleSearch();
+          }}
+          >
           <input
             type="text"
             placeholder="Search..."
             className="p-2 border border-gray-300 rounded"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
+          </form>
           <select
             className="p-2 border-2 border-gray-300 rounded text-black"
             value={sortOption}
