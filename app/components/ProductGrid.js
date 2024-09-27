@@ -128,7 +128,7 @@ function ProductCard({ product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/products/${product.id}`} className="block relative w-full h-64 flex items-center justify-center bg-gray-100">
+      <Link href={`/products/${product.id}`} className="relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             {/* Loading spinner */}
