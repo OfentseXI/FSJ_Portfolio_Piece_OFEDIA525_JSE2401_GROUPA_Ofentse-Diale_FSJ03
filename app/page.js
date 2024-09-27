@@ -9,7 +9,7 @@ import Pagination from './components/Pagination';
  * @returns {Promise<Object[]>} A promise that resolves to the array of products.
  * @throws {Error} Throws an error if the fetch request fails.
  */
-async function fetchProducts(page = 1, limit = 20) {
+async function fetchProducts(page = 1, limit = 1000) {
   const skip = (page - 1) * limit;
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products?limit=${limit}&skip=${skip}`);
   if (!response.ok) {
