@@ -9,22 +9,23 @@ export default function ProductGrid({ products, searchParams }) {
   const [sortOption, setSortOption] = useState(searchParams.sortBy || '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
   const [categories, setCategories] = useState([]); // State to store categories
+  const [hasFilters, setHasFilters] = useState(false); // Track if filters or sort are applied
 
   /**
- * Fetch categories from the API.
- *
- * @returns {Promise<string[]>} A promise that resolves to an array of category names.
- * @throws {Error} Throws an error if the fetch request fails.
- */
-async function fetchCategories() {
-  const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch categories');
+   * Fetch categories from the API.
+   *
+   * @returns {Promise<string[]>} A promise that resolves to an array of category names.
+   * @throws {Error} Throws an error if the fetch request fails.
+   */
+  async function fetchCategories() {
+    const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch categories');
+    }
+    
+    return response.json();
   }
-  
-  return response.json();
-}
 
   // Function to handle search
   const handleSearch = () => {
@@ -60,7 +61,6 @@ async function fetchCategories() {
       params.delete("category");
     }
     if (sortOption) {
-      // Split sortOption to get sortBy and order (e.g., 'price-desc' or 'price-asc')
       const [sortBy, order] = sortOption.split("-");
       params.set("sortBy", sortBy);
       params.set("order", order);
@@ -71,14 +71,27 @@ async function fetchCategories() {
     router.push(`/?${params.toString()}`);
   };
 
+  // Update the hasFilters state when filters or sort options change
   useEffect(() => {
+    const isFiltered = searchTerm || sortOption || categoryFilter;
+    setHasFilters(!!isFiltered); // Set to true if any option is active
     handleFilterSort();
-  }, [categoryFilter, sortOption]);
+  }, [categoryFilter, sortOption, searchTerm]);
+
+  // Function to reset filters and sort
+  const handleReset = () => {
+    setSearchTerm('');
+    setSortOption('');
+    setCategoryFilter('');
+    const params = new URLSearchParams();
+    params.set("page", "1");  // Reset to the first page
+    router.push(`/?${params.toString()}`);
+  };
 
   return (
     <div className="bg-gray-50 py-12">
       {/* Search, Sort, and Filter Controls */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
         <div className="flex space-x-4">
           <form
             onChange={(e) => {
@@ -109,7 +122,6 @@ async function fetchCategories() {
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="">All Categories</option>
-            {/* Dynamically populate categories */}
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -117,6 +129,15 @@ async function fetchCategories() {
             ))}
           </select>
         </div>
+        {/* Reset Button */}
+        {hasFilters && (
+          <button
+            className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition"
+            onClick={handleReset}
+          >
+            Reset Filters
+          </button>
+        )}
       </div>
 
       {/* Product Grid */}
