@@ -5,13 +5,6 @@ import Loading from '@/app/loading';
 import Link from 'next/link';
 import ErrorPage from '@/app/error'; 
 
-/**
- * Fetch product details from the API.
- *
- * @param {string} id - The ID of the product to fetch.
- * @returns {Promise<Object>} A promise that resolves to the product details.
- * @throws {Error} Throws an error if the fetch request fails.
- */
 async function fetchProductDetails(id) {
   const response = await fetch(`https://next-ecommerce-api.vercel.app/products/${id}`);
   if (!response.ok) {
@@ -20,65 +13,81 @@ async function fetchProductDetails(id) {
   return response.json();
 }
 
-/**
- * ProductDetails component to display detailed information about a single product.
- *
- * @param {Object} props - The component props.
- * @param {Object} props.params - The parameters from the URL.
- * @param {string} props.params.id - The ID of the product to display details for.
- * @returns {JSX.Element} The rendered ProductDetails component.
- */
 export default function ProductDetails({ params }) {
   const { id } = params;
-  const [product, setProduct] = useState(null); // State to store product details
-  const [loading, setLoading] = useState(true); // State to manage loading status
-  const [error, setError] = useState(null); // State to manage error status
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track the current image index
-  const [reviewsVisible, setReviewsVisible] = useState(false); // State to toggle reviews visibility
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reviewsVisible, setReviewsVisible] = useState(false);
+  const [sortBy, setSortBy] = useState('');
+  const [sortOrder, setSortOrder] = useState('');
 
-  /**
-   * Fetch product details when the component mounts or the product ID changes.
-   */
   useEffect(() => {
     const loadProductDetails = async () => {
-      setLoading(true); // Set loading to true while fetching data
-      setError(null); // Reset error state before fetching
+      setLoading(true);
+      setError(null);
       try {
         const productData = await fetchProductDetails(id);
-        setProduct(productData); // Update product state with fetched data
+        setProduct(productData);
       } catch (err) {
-        setError('Failed to load product details. Please try again later.'); // Update error state on failure
+        setError('Failed to load product details. Please try again later.');
       } finally {
-        setLoading(false); // Disable loading state after fetching is complete
+        setLoading(false);
       }
     };
     loadProductDetails();
-  }, [id]); // Dependency array to refetch product details when the ID changes
+  }, [id]);
 
   if (loading) {
-    return <Loading />; // Show loading spinner while data is being fetched
+    return <Loading />;
   }
 
   if (error) {
-    return <ErrorPage message={error} />; // Show error page if there's an error
+    return <ErrorPage message={error} />;
   }
 
-  /**
-   * Handle image navigation to the next image.
-   */
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
-  /**
-   * Handle image navigation to the previous image.
-   */
   const handlePreviousImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
     );
+  };
+
+  // Handle sort change
+  const handleSortChange = (sortField, order) => {
+    setSortBy(sortField);
+    setSortOrder(order);
+  };
+
+  // Handle reset filters
+  const resetFilters = () => {
+    setSortBy('');
+    setSortOrder('');
+  };
+
+  // Sort reviews based on selected criteria
+  const sortedReviews = () => {
+    if (!product.reviews || product.reviews.length === 0) return [];
+
+    return [...product.reviews].sort((a, b) => {
+      if (sortBy === 'date') {
+        return sortOrder === 'asc'
+          ? new Date(a.date) - new Date(b.date)
+          : new Date(b.date) - new Date(a.date);
+      }
+      if (sortBy === 'rating') {
+        return sortOrder === 'asc'
+          ? a.rating - b.rating
+          : b.rating - a.rating;
+      }
+      return 0; // No sorting if no criteria is selected
+    });
   };
 
   return (
@@ -210,33 +219,76 @@ export default function ProductDetails({ params }) {
               </button>
 
               {reviewsVisible && (
-                <div className="mt-6 space-y-6">
-                  {product.reviews?.length > 0 ? (
-                    product.reviews.map((review, index) => (
-                      <div key={index} className="bg-gray-50 p-6 rounded-lg">
-                        <p className="font-semibold text-gray-900">{review.reviewerName}</p>
-                        <p className="text-gray-600 text-sm">
-                          {new Date(review.date).toLocaleDateString()}
-                        </p>
-                        <p className="mt-2 text-gray-700">{review.comment}</p>
-                        <div className="text-yellow-400 mt-2">
-                          {Array(Math.round(review.rating || 0)).fill('★').join('')}
+                <>
+                  {/* Sort buttons */}
+                  <div className="mt-4 flex gap-4">
+                    {/* Sort by Date */}
+                    <div>
+                      <p className="text-gray-700 mb-2 font-semibold">Sort by Date:</p>
+                      <button
+                        onClick={() => handleSortChange('date', 'desc')}
+                        className={`bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-black${
+                          sortBy === 'date' && sortOrder === 'desc' ? 'bg-gray-400' : ''
+                        }`}
+                      >
+                        Newest
+                      </button>
+                      <button
+                        onClick={() => handleSortChange('date', 'asc')}
+                        className={`bg-gray-200 px-4 py-2 ml-2 rounded-lg hover:bg-gray-300 transition-colors text-black${
+                          sortBy === 'date' && sortOrder === 'asc' ? 'bg-gray-400' : ''
+                        }`}
+                      >
+                        Oldest
+                      </button>
+                    </div>
+                    {/* Sort by Rating */}
+                    <div>
+                      <p className="text-gray-700 mb-2 font-semibold">Sort by Rating:</p>
+                      <button
+                        onClick={() => handleSortChange('rating', 'desc')}
+                        className={`bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-black${
+                          sortBy === 'rating' && sortOrder === 'desc' ? 'bg-gray-400' : ''
+                        }`}
+                      >
+                        Highest
+                      </button>
+                      <button
+                        onClick={() => handleSortChange('rating', 'asc')}
+                        className={`bg-gray-200 px-4 py-2 ml-2 rounded-lg hover:bg-gray-300 transition-colors text-black${
+                          sortBy === 'rating' && sortOrder === 'asc' ? 'bg-gray-400' : ''
+                        }`}
+                      >
+                        Lowest
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Display reviews */}
+                  <div className="mt-4 bg-gray-200 p-4 rounded-lg">
+                    {sortedReviews().map((review) => (
+                      <div
+                        key={review.id}
+                        className="bg-gray-100 p-4 rounded-md mb-4 shadow-md"
+                      >
+                        <div className="flex items-center mb-2">
+                          <p className="font-bold text-gray-900">{review.reviewerName}</p>
+                          <span className="ml-auto text-yellow-400">
+                            {Array(Math.round(review.rating)).fill('★').join('')}
+                          </span>
                         </div>
+                        <p className="text-gray-700">{review.comment}</p>
+                        <p className="text-gray-500 text-sm mt-2">{new Date(review.date).toLocaleDateString()}</p>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-700">No reviews yet.</p>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
-
-            {/* Back to Products Link */}
-            <div className="mt-10">
-              <Link href="/" className="text-indigo-600 hover:text-indigo-800 font-medium">
-                ← Back to Products
+             {/* Back to Products Button */}
+             <Link href="/" className="mt-6 inline-block text-indigo-600 hover:text-indigo-800">
+                    &larr; Back to Products
               </Link>
-            </div>
           </div>
         </div>
       </div>
