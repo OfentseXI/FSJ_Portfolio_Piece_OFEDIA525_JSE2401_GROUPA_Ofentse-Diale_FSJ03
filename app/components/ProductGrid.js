@@ -73,14 +73,13 @@ export default function ProductGrid({ products, searchParams }) {
 
   // Update the hasFilters state when filters or sort options change
   useEffect(() => {
-    const isFiltered = searchTerm || sortOption || categoryFilter;
+    const isFiltered = sortOption || categoryFilter;
     setHasFilters(!!isFiltered); // Set to true if any option is active
     handleFilterSort();
-  }, [categoryFilter, sortOption, searchTerm]);
+  }, [categoryFilter, sortOption]);
 
   // Function to reset filters and sort
   const handleReset = () => {
-    setSearchTerm('');
     setSortOption('');
     setCategoryFilter('');
     const params = new URLSearchParams();
@@ -102,7 +101,7 @@ export default function ProductGrid({ products, searchParams }) {
             <input
               type="text"
               placeholder="Search..."
-              className="p-2 border border-gray-300 rounded"
+              className="p-2 border border-gray-300 rounded text-gray-700"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
