@@ -1,51 +1,79 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-export default function ProductGrid({ products, initialSearchTerm }) {
-  const searchParams = useSearchParams;
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [sortOption, setSortOption] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-
+export default function ProductGrid({ products, searchParams }) {
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
+  const [sortOption, setSortOption] = useState(searchParams.sortBy || '');
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
+  const [categories, setCategories] = useState([]); // State to store categories
 
-  // Search, Sort, and Filter Products
-  useEffect(() => {
-    let updatedProducts = [...products];
+  /**
+ * Fetch categories from the API.
+ *
+ * @returns {Promise<string[]>} A promise that resolves to an array of category names.
+ * @throws {Error} Throws an error if the fetch request fails.
+ */
+async function fetchCategories() {
+  const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch categories');
+  }
+  
+  return response.json();
+}
 
-    // Search
-   const handleSearch = () => {
+  // Function to handle search
+  const handleSearch = () => {
     const params = new URLSearchParams(searchParams);
     if (searchTerm) {
       params.set("search", searchTerm);
-    } else {params.delete("search");  
-    } params.set("page", "1");
+    } else {
+      params.delete("search");
+    }
+    params.set("page", "1");  // Reset to first page after search
     router.push(`/?${params.toString()}`);
-   };
+  };
 
-    // Filter by Category
+  // Fetch categories on component mount
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const fetchedCategories = await fetchCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  // Function to handle sorting and filtering
+  const handleFilterSort = () => {
+    const params = new URLSearchParams(searchParams);
     if (categoryFilter) {
-      updatedProducts = updatedProducts.filter(
-        product => product.category === categoryFilter
-      );
+      params.set("category", categoryFilter);
+    } else {
+      params.delete("category");
     }
-
-    // Sort
-    if (sortOption === 'price-asc') {
-      updatedProducts.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-desc') {
-      updatedProducts.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'name-asc') {
-      updatedProducts.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortOption === 'name-desc') {
-      updatedProducts.sort((a, b) => b.title.localeCompare(a.title));
+    if (sortOption) {
+      // Split sortOption to get sortBy and order (e.g., 'price-desc' or 'price-asc')
+      const [sortBy, order] = sortOption.split("-");
+      params.set("sortBy", sortBy);
+      params.set("order", order);
+    } else {
+      params.delete("sortBy");
+      params.delete("order");
     }
+    router.push(`/?${params.toString()}`);
+  };
 
-    setFilteredProducts(updatedProducts);
-  }, [searchTerm, sortOption, categoryFilter, products]);
+  useEffect(() => {
+    handleFilterSort();
+  }, [categoryFilter, sortOption]);
 
   return (
     <div className="bg-gray-50 py-12">
@@ -53,28 +81,27 @@ export default function ProductGrid({ products, initialSearchTerm }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
         <div className="flex space-x-4">
           <form
-          onChange={(e) => {
-            handleSearch();
-          }}
+            onChange={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
           >
-          <input
-            type="text"
-            placeholder="Search..."
-            className="p-2 border border-gray-300 rounded"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="p-2 border border-gray-300 rounded"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </form>
           <select
             className="p-2 border-2 border-gray-300 rounded text-black"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
           >
-            <option value="">Sort by</option>
+            <option value="">Default Sort</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
-            <option value="name-asc">Name: A to Z</option>
-            <option value="name-desc">Name: Z to A</option>
           </select>
           <select
             className="p-2 border-2 border-gray-300 rounded text-black"
@@ -82,9 +109,12 @@ export default function ProductGrid({ products, initialSearchTerm }) {
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="">All Categories</option>
-            <option value="electronics">Electronics</option>
-            <option value="fashion">Fashion</option>
-            {/* Add more categories as needed */}
+            {/* Dynamically populate categories */}
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -92,8 +122,8 @@ export default function ProductGrid({ products, initialSearchTerm }) {
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
+          {products.length > 0 ? (
+            products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (

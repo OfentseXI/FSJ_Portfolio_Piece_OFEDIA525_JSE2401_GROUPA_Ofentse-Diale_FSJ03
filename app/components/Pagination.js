@@ -7,19 +7,31 @@ import { useState } from 'react';
  *
  * @param {Object} props - The component props.
  * @param {number} props.currentPage - The current page number for pagination.
+ * @param {string} [props.search] - Search query.
+ * @param {string} [props.category] - Selected category.
+ * @param {string} [props.sortBy] - Selected sorting criteria.
+ * @param {string} [props.order] - Sorting order.
  * @returns {JSX.Element} The rendered pagination component.
  */
-export default function Pagination({ currentPage }) {
+export default function Pagination({ currentPage, search, category, sortBy, order }) {
   // State to control the visibility of tooltips
   const [showPrevTooltip, setShowPrevTooltip] = useState(false);
   const [showNextTooltip, setShowNextTooltip] = useState(false);
+
+  // Constructing query parameters
+  const params = new URLSearchParams({
+    sortBy,
+    order,
+    ...(search && { search: encodeURIComponent(search) }),
+    ...(category && { category: encodeURIComponent(category) }),
+  });
 
   return (
     <div className="flex justify-center my-6">
       {/* Previous Page Link */}
       <div className="relative flex items-center">
         <Link
-          href={`/?page=${currentPage - 1}`}
+          href={currentPage > 1 ? `/?page=${currentPage - 1}&${params}` : '/'}
           className={`mr-4 px-4 py-2 transition-colors duration-200 ${
             currentPage <= 1
               ? 'text-gray-400 cursor-not-allowed'
@@ -56,7 +68,7 @@ export default function Pagination({ currentPage }) {
       {/* Next Page Link */}
       <div className="relative flex items-center">
         <Link
-          href={`/?page=${currentPage + 1}`}
+          href={`/?page=${currentPage + 1}&${params}`}
           className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
           onMouseEnter={() => setShowNextTooltip(true)} // Show tooltip on hover
           onMouseLeave={() => setShowNextTooltip(false)} // Hide tooltip when not hovered

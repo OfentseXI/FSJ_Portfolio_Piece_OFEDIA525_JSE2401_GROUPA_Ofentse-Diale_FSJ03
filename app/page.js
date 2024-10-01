@@ -9,12 +9,36 @@ import Pagination from './components/Pagination';
  * @returns {Promise<Object[]>} A promise that resolves to the array of products.
  * @throws {Error} Throws an error if the fetch request fails.
  */
-async function fetchProducts(page = 1, limit = 20) {
+async function fetchProducts({ 
+  page = 1, 
+  limit = 20, 
+  search = '', 
+  category = '', 
+  sortBy = 'id', 
+  order = 'asc' 
+  } = {}) {
+  
+  
   const skip = (page - 1) * limit;
-  const response = await fetch(`https://next-ecommerce-api.vercel.app/products?limit=${limit}&skip=${skip}`);
+
+  // Build individual query strings
+  const limitQuery = `limit=${limit}`;
+  const skipQuery = `skip=${skip}`;
+  const sortByQuery = `sortBy=${sortBy}`;
+  const orderQuery = `order=${order}`;
+  const searchQuery = search ? `search=${encodeURIComponent(search)}` : '';
+  const categoryQuery = category ? `category=${encodeURIComponent(category)}` : '';
+
+  // Combine the query strings into a single string
+  const queryString = [limitQuery, skipQuery, sortByQuery, orderQuery, searchQuery, categoryQuery]
+    .filter(Boolean)
+    .join('&');
+
+  const response = await fetch(`https://next-ecommerce-api.vercel.app/products?${queryString}`);
+  
   if (!response.ok) {
     throw new Error('Failed to fetch products');
-  }
+  } 
   return response.json();
 }
 
@@ -35,13 +59,17 @@ export const metadata = {
 
 export default async function ProductsPage({ searchParams }) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
-  
+  const search = searchParams.search || '';  // Handle search parameter
+  const category = searchParams.category || '';  // Handle category parameter
+  const sortBy = searchParams.sortBy || '';  // Handle sort parameter
+  const order = searchParams.order || '';  // Handle order parameter
+
   try {
-    const products = await fetchProducts(page); // Fetch products on the server
+    const products = await fetchProducts({ page, search, category, sortBy, order }); // Fetch products on the server
     return (
       <div>
-        <ProductGrid products={products} /> {/* Display products in a grid */}
-        <Pagination currentPage={page} /> {/* Display pagination controls */}
+        <ProductGrid products={products} searchParams={searchParams}  /> {/* Display products in a grid */}
+        <Pagination currentPage={page} search={search} category={category} sortBy={sortBy} order={order}/> {/* Display pagination controls */}
       </div>
     );
   } catch (err) {
