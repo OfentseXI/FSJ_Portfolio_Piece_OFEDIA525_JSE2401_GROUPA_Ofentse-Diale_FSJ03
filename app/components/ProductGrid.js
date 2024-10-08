@@ -8,26 +8,17 @@ export default function ProductGrid({ products, searchParams }) {
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
   const [sortOption, setSortOption] = useState(searchParams.sortBy || '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
-  const [categories, setCategories] = useState([]); // State to store categories
-  const [hasFilters, setHasFilters] = useState(false); // Track if filters or sort are applied
+  const [categories, setCategories] = useState([]);
+  const [hasFilters, setHasFilters] = useState(false);
 
-  /**
-   * Fetch categories from the API.
-   *
-   * @returns {Promise<string[]>} A promise that resolves to an array of category names.
-   * @throws {Error} Throws an error if the fetch request fails.
-   */
   async function fetchCategories() {
     const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
-    
     if (!response.ok) {
       throw new Error('Failed to fetch categories');
     }
-    
     return response.json();
   }
 
-  // Function to handle search
   const handleSearch = () => {
     const params = new URLSearchParams(searchParams);
     if (searchTerm) {
@@ -35,11 +26,10 @@ export default function ProductGrid({ products, searchParams }) {
     } else {
       params.delete("search");
     }
-    params.set("page", "1");  // Reset to first page after search
+    params.set("page", "1");
     router.push(`/?${params.toString()}`);
   };
 
-  // Fetch categories on component mount
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -52,7 +42,6 @@ export default function ProductGrid({ products, searchParams }) {
     loadCategories();
   }, []);
 
-  // Function to handle sorting and filtering
   const handleFilterSort = () => {
     const params = new URLSearchParams(searchParams);
     if (categoryFilter) {
@@ -71,27 +60,24 @@ export default function ProductGrid({ products, searchParams }) {
     router.push(`/?${params.toString()}`);
   };
 
-  // Update the hasFilters state when filters or sort options change
   useEffect(() => {
     const isFiltered = sortOption || categoryFilter;
-    setHasFilters(!!isFiltered); // Set to true if any option is active
+    setHasFilters(!!isFiltered);
     handleFilterSort();
   }, [categoryFilter, sortOption]);
 
-  // Function to reset filters and sort
   const handleReset = () => {
     setSortOption('');
     setCategoryFilter('');
     const params = new URLSearchParams();
-    params.set("page", "1");  // Reset to the first page
+    params.set("page", "1");
     router.push(`/?${params.toString()}`);
   };
 
   return (
-    <div className="bg-gray-50 py-12">
-      {/* Search, Sort, and Filter Controls */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
-        <div className="flex space-x-4">
+    <div className="bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <form
             onChange={(e) => {
               e.preventDefault();
@@ -101,13 +87,13 @@ export default function ProductGrid({ products, searchParams }) {
             <input
               type="text"
               placeholder="Search..."
-              className="p-2 border border-gray-300 rounded text-gray-700"
+              className="p-2 w-full sm:w-auto border border-gray-300 rounded text-gray-700"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <select
-            className="p-2 border-2 border-gray-300 rounded text-black"
+            className="p-2 border-2 border-gray-300 rounded text-black w-full sm:w-auto"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
           >
@@ -116,7 +102,7 @@ export default function ProductGrid({ products, searchParams }) {
             <option value="price-desc">Price: High to Low</option>
           </select>
           <select
-            className="p-2 border-2 border-gray-300 rounded text-black"
+            className="p-2 border-2 border-gray-300 rounded text-black w-full sm:w-auto"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
@@ -128,10 +114,9 @@ export default function ProductGrid({ products, searchParams }) {
             ))}
           </select>
         </div>
-        {/* Reset Button */}
         {hasFilters && (
           <button
-            className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition"
+            className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition w-full sm:w-auto"
             onClick={handleReset}
           >
             Reset Filters
@@ -139,9 +124,8 @@ export default function ProductGrid({ products, searchParams }) {
         )}
       </div>
 
-      {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {products.length > 0 ? (
             products.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -178,10 +162,9 @@ function ProductCard({ product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/products/${product.id}`} className="relative w-full h-64 flex items-center justify-center bg-gray-100">
+      <Link href={`/products/${product.id}`} className="relative w-full h-56 sm:h-64 md:h-72 flex items-center justify-center bg-gray-100">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            {/* Loading spinner */}
             <svg
               className="animate-spin h-8 w-8 text-gray-500"
               xmlns="http://www.w3.org/2000/svg"
@@ -217,7 +200,7 @@ function ProductCard({ product }) {
         <>
           <button
             onClick={handlePreviousImage}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-1 md:p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -225,7 +208,7 @@ function ProductCard({ product }) {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="w-6 h-6 text-gray-800"
+              className="w-4 h-4 md:w-6 md:h-6 text-gray-800"
             >
               <path
                 strokeLinecap="round"
@@ -237,7 +220,7 @@ function ProductCard({ product }) {
 
           <button
             onClick={handleNextImage}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-1 md:p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -245,7 +228,7 @@ function ProductCard({ product }) {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="w-6 h-6 text-gray-800"
+              className="w-4 h-4 md:w-6 md:h-6 text-gray-800"
             >
               <path
                 strokeLinecap="round"
@@ -257,7 +240,7 @@ function ProductCard({ product }) {
         </>
       )}
 
-      <div className="p-6">
+<div className="p-6">
         <Link href={`/products/${product.id}`}>
           <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
             {product.title}
@@ -274,7 +257,7 @@ function ProductCard({ product }) {
           >
             View Details
           </Link>
-        </div>
+        </div>      
       </div>
     </div>
   );
