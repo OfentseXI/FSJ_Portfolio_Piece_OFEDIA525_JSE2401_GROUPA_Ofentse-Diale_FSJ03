@@ -6,29 +6,25 @@ import { useRouter } from 'next/navigation';
 export default function ProductGrid({ products, searchParams }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
-  const [sortOption, setSortOption] = useState(searchParams.sortBy || '');
+  const [sortOption, setSortOption] = useState(searchParams.sortBy ? `${searchParams.sortBy}-${searchParams.order}` : '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
-  const [categories, setCategories] = useState([]); // State to store categories
-  const [hasFilters, setHasFilters] = useState(false); // Track if filters or sort are applied
+  const [categories, setCategories] = useState([]);
+  const [hasFilters, setHasFilters] = useState(false);
 
-  /**
-   * Fetch categories from the API.
-   *
-   * @returns {Promise<string[]>} A promise that resolves to an array of category names.
-   * @throws {Error} Throws an error if the fetch request fails.
-   */
   async function fetchCategories() {
-    const response = await fetch('http://localhost:3000/api/categories');
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch categories');
+    try {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const data = await response.json();
+      return data[0].categories;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      return [];
     }
-    
-    const data = await response.json();
-    return data[0].categories; // Extract the categories array from the response
   }
 
-  // Function to handle search
   const handleSearch = () => {
     const params = new URLSearchParams(searchParams);
     if (searchTerm) {
@@ -36,24 +32,14 @@ export default function ProductGrid({ products, searchParams }) {
     } else {
       params.delete("search");
     }
-    params.set("page", "1");  // Reset to first page after search
+    params.set("page", "1");
     router.push(`/?${params.toString()}`);
   };
 
-  // Fetch categories on component mount
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        const fetchedCategories = await fetchCategories();
-        setCategories(fetchedCategories);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    }
-    loadCategories();
+    fetchCategories().then(setCategories);
   }, []);
 
-  // Function to handle sorting and filtering
   const handleFilterSort = () => {
     const params = new URLSearchParams(searchParams);
     if (categoryFilter) {
@@ -69,36 +55,28 @@ export default function ProductGrid({ products, searchParams }) {
       params.delete("sortBy");
       params.delete("order");
     }
+    params.set("page", "1");
     router.push(`/?${params.toString()}`);
   };
 
-  // Update the hasFilters state when filters or sort options change
   useEffect(() => {
     const isFiltered = sortOption || categoryFilter;
-    setHasFilters(!!isFiltered); // Set to true if any option is active
+    setHasFilters(!!isFiltered);
     handleFilterSort();
   }, [categoryFilter, sortOption]);
 
-  // Function to reset filters and sort
   const handleReset = () => {
+    setSearchTerm('');
     setSortOption('');
     setCategoryFilter('');
-    const params = new URLSearchParams();
-    params.set("page", "1");  // Reset to the first page
-    router.push(`/?${params.toString()}`);
+    router.push('/?page=1');
   };
 
   return (
     <div className="bg-gray-50 py-12">
-      {/* Search, Sort, and Filter Controls */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
         <div className="flex space-x-4">
-          <form
-            onChange={(e) => {
-              e.preventDefault();
-              handleSearch();
-            }}
-          >
+          <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <input
               type="text"
               placeholder="Search..."
@@ -124,14 +102,11 @@ export default function ProductGrid({ products, searchParams }) {
             <option value="">All Categories</option>
             {categories.map((category) => (
               <option key={category} value={category}>
-                {typeof category === 'string'
-                  ? category.charAt(0).toUpperCase() + category.slice(1)
-                  : category}
+                {category.charAt(0).toUpperCase() + category.slice(1)}
               </option>
             ))}
           </select>
         </div>
-        {/* Reset Button */}
         {hasFilters && (
           <button
             className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition"
@@ -142,7 +117,6 @@ export default function ProductGrid({ products, searchParams }) {
         )}
       </div>
 
-      {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {products.length > 0 ? (
