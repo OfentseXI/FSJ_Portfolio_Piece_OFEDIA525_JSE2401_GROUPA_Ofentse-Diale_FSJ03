@@ -13,15 +13,14 @@ import Pagination from './components/Pagination';
  * @returns {Promise<Object[]>} A promise that resolves to the array of products.
  * @throws {Error} Throws an error if the fetch request fails.
  */
-async function fetchProducts({ 
-  page = 1, 
-  limit = 20, 
-  search = '', 
-  category = '', 
+async function fetchProducts({
+  page = 1,
+  limit = 20,
+  search = '',
+  category = '',
   sortBy = 'price',  // Default to price if not provided
-  order = 'asc' 
+  order = 'asc',
 } = {}) {
-  // Build individual query strings for Firebase
   const limitQuery = `limit=${limit}`;
   const pageQuery = `page=${page}`;
   const sortByQuery = `sortBy=${sortBy}`;
@@ -29,18 +28,18 @@ async function fetchProducts({
   const searchQuery = search ? `search=${encodeURIComponent(search)}` : '';
   const categoryQuery = category ? `category=${encodeURIComponent(category)}` : '';
 
-  // Combine the query strings into a single string
   const queryString = [limitQuery, pageQuery, sortByQuery, orderQuery, searchQuery, categoryQuery]
     .filter(Boolean)
     .join('&');
 
-  const response = await fetch(`http://localhost:3000/api/products?${queryString.toString()}
-  `);
+  const response = await fetch(`http://localhost:3000/api/products?${queryString}`);
   
   if (!response.ok) {
     throw new Error('Failed to fetch products');
-  } 
-  return response.json();
+  }
+
+  const data = await response.json();
+  return data;  // Return the products and page info from the API
 }
 
 /**
