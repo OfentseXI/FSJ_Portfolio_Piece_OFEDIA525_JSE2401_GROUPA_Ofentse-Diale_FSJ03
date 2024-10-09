@@ -1,91 +1,95 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { fetchProducts } from '../api/products/route';
+import Link from 'next/link';
+import { useState } from 'react';
 
 /**
- * Pagination and Product Fetching Component.
+ * Pagination component to display navigation controls for paginated content.
+ *
+ * @param {Object} props - The component props.
+ * @param {number} props.currentPage - The current page number for pagination.
+ * @param {string} [props.search] - Search query.
+ * @param {string} [props.category] - Selected category.
+ * @param {string} [props.sortBy] - Selected sorting criteria.
+ * @param {string} [props.order] - Sorting order.
+ * @returns {JSX.Element} The rendered pagination component.
  */
-export default function ProductList() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [products, setProducts] = useState([]);
-  const [lastVisible, setLastVisible] = useState(null); // Track last product
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [sortBy, setSortBy] = useState('price');
-  const [order, setOrder] = useState('asc');
+export default function Pagination({ currentPage, search, category, sortBy, order }) {
+  // State to control the visibility of tooltips
+  const [showPrevTooltip, setShowPrevTooltip] = useState(false);
+  const [showNextTooltip, setShowNextTooltip] = useState(false);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      const { products: fetchedProducts, lastVisibleProduct } = await fetchProducts({
-        page: currentPage,
-        limit: 20,
-        search,
-        category,
-        sortBy,
-        order,
-        lastVisible,
-      });
-      
-      setProducts(fetchedProducts);
-      setLastVisible(lastVisibleProduct);
-    };
-
-    loadProducts();
-  }, [currentPage, search, category, sortBy, order]);
-
-  const handleNextPage = () => {
-    setCurrentPage(prevPage => prevPage + 1);
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
-    }
-  };
+  // Constructing query parameters
+  const params = new URLSearchParams({
+    sortBy,
+    order,
+    ...(search && { search: encodeURIComponent(search) }),
+    ...(category && { category: encodeURIComponent(category) }),
+  });
 
   return (
-    <div>
-      <div className="search-filter">
-        {/* Add your search/filter inputs here */}
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search products..."
-        />
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">All Categories</option>
-          {/* Add more categories here */}
-        </select>
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option value="price">Price</option>
-          {/* Add more sorting options here */}
-        </select>
-        <select value={order} onChange={(e) => setOrder(e.target.value)}>
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-      </div>
-
-      <div className="product-grid">
-        {/* Render your products here */}
-        {products.map(product => (
-          <div key={product.id} className="product-card">
-            {/* Product details */}
-            <p>{product.name}</p>
-            <p>{product.price}</p>
+    <div className="flex justify-center my-6">
+      {/* Previous Page Link */}
+      <div className="relative flex items-center">
+        <Link
+          href={currentPage > 1 ? `/?page=${currentPage - 1}&${params}` : '/'}
+          className={`mr-4 px-4 py-2 transition-colors duration-200 ${
+            currentPage <= 1
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-blue-600 hover:text-blue-800'
+          }`}
+          onMouseEnter={() => setShowPrevTooltip(true)} // Show tooltip on hover
+          onMouseLeave={() => setShowPrevTooltip(false)} // Hide tooltip when not hovered
+          disabled={currentPage <= 1} // Disable link if on the first page
+        >
+          {/* Left Arrow Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </Link>
+        {/* Tooltip for "Previous" Link */}
+        {showPrevTooltip && currentPage > 1 && (
+          <div className="absolute left-0 bottom-full mb-2 px-2 py-1 bg-gray-700 text-white text-sm rounded-md shadow-lg">
+            Previous
           </div>
-        ))}
+        )}
       </div>
 
-      <div className="pagination-controls">
-        <button onClick={handlePreviousPage} disabled={currentPage <= 1}>
-          Previous
-        </button>
-        <span>Page {currentPage}</span>
-        <button onClick={handleNextPage}>
-          Next
-        </button>
+      {/* Current Page Indicator */}
+      <span className="mx-4 px-4 py-2 text-gray-900 bg-gray-200 rounded-md">
+        Page {currentPage}
+      </span>
+
+      {/* Next Page Link */}
+      <div className="relative flex items-center">
+        <Link
+          href={`/?page=${currentPage + 1}&${params}`}
+          className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+          onMouseEnter={() => setShowNextTooltip(true)} // Show tooltip on hover
+          onMouseLeave={() => setShowNextTooltip(false)} // Hide tooltip when not hovered
+        >
+          {/* Right Arrow Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+        {/* Tooltip for "Next" Link */}
+        {showNextTooltip && (
+          <div className="absolute left-0 bottom-full mb-2 px-2 py-1 bg-gray-700 text-white text-sm rounded-md shadow-lg">
+            Next
+          </div>
+        )}
       </div>
     </div>
   );

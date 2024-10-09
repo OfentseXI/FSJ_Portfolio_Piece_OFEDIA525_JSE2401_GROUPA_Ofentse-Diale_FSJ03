@@ -1,6 +1,6 @@
 import ProductGrid from './components/ProductGrid';
 import Pagination from './components/Pagination';
-import { fetchProducts } from './api/products/route'; // Import the updated fetchProducts function
+import { fetchProducts } from './api/products/route';
 
 export const metadata = {
   title: 'MyStore',
@@ -9,23 +9,22 @@ export const metadata = {
 
 export default async function ProductsPage({ searchParams }) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
-  const search = searchParams.search || '';  // Handle search parameter
-  const category = searchParams.category || '';  // Handle category parameter
-  const sortBy = searchParams.sortBy || 'id';  // Handle sort parameter
-  const order = searchParams.order || 'asc';  // Handle order parameter
+  const search = searchParams.search || '';
+  const category = searchParams.category || '';
+  const sortBy = searchParams.sortBy || 'price';
+  const order = searchParams.order || 'asc';
 
   try {
-    // Fetch products from Firestore
     const products = await fetchProducts({ page, search, category, sortBy, order });
 
     return (
       <div>
-        <ProductGrid products={products} searchParams={searchParams} /> {/* Display products in a grid */}
-        <Pagination currentPage={page} search={search} category={category} sortBy={sortBy} order={order} /> {/* Display pagination controls */}
+        <ProductGrid products={products} searchParams={searchParams} />
+        <Pagination currentPage={page} search={search} category={category} sortBy={sortBy} order={order} />
       </div>
     );
   } catch (err) {
-    // Handle errors (displaying a message or redirecting)
-    throw err; // Show 404 page if data fetching fails
+    console.error('Error fetching products:', err);
+    return <div>Error loading products. Please try again later.</div>;
   }
 }

@@ -2,8 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { collection, getDocs } from "firebase/firestore"; 
-import { db } from "../api/products/firebaseConfig"; 
+import { fetchCategories } from '../api/categories/route';
 
 export default function ProductGrid({ products, searchParams }) {
   const router = useRouter();
@@ -12,25 +11,6 @@ export default function ProductGrid({ products, searchParams }) {
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
   const [categories, setCategories] = useState([]);
   const [hasFilters, setHasFilters] = useState(false);
-
-  // Function to fetch categories from Firestore
-  async function fetchCategories() {
-    const categoriesCollection = collection(db, 'categories');
-    const categorySnapshot = await getDocs(categoriesCollection);
-    const categoryList = categorySnapshot.docs.map(doc => doc.data().name); // Assuming categories have a 'name' field
-    return categoryList;
-  }
-
-  const handleSearch = () => {
-    const params = new URLSearchParams(searchParams);
-    if (searchTerm) {
-      params.set("search", searchTerm);
-    } else {
-      params.delete("search");
-    }
-    params.set("page", "1");
-    router.push(`/?${params.toString()}`);
-  };
 
   useEffect(() => {
     async function loadCategories() {
@@ -44,6 +24,19 @@ export default function ProductGrid({ products, searchParams }) {
     loadCategories();
   }, []);
 
+  // Function to handle search
+  const handleSearch = () => {
+    const params = new URLSearchParams(searchParams);
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    } else {
+      params.delete("search");
+    }
+    params.set("page", "1");  // Reset to first page after search
+    router.push(`/?${params.toString()}`);
+  };
+
+  // Function to handle sorting and filtering
   const handleFilterSort = () => {
     const params = new URLSearchParams(searchParams);
     if (categoryFilter) {
@@ -62,27 +55,29 @@ export default function ProductGrid({ products, searchParams }) {
     router.push(`/?${params.toString()}`);
   };
 
+  // Update the hasFilters state when filters or sort options change
   useEffect(() => {
     const isFiltered = sortOption || categoryFilter;
-    setHasFilters(!!isFiltered);
+    setHasFilters(!!isFiltered); // Set to true if any option is active
     handleFilterSort();
   }, [categoryFilter, sortOption]);
 
+  // Function to reset filters and sort
   const handleReset = () => {
     setSortOption('');
     setCategoryFilter('');
     const params = new URLSearchParams();
-    params.set("page", "1");
+    params.set("page", "1");  // Reset to the first page
     router.push(`/?${params.toString()}`);
   };
 
   return (
-    <div className="bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0">
-        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* Removed debounce logic, now search triggers onChange directly */}
+    <div className="bg-gray-50 py-12">
+      {/* Search, Sort, and Filter Controls */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
+        <div className="flex space-x-4">
           <form
-            onSubmit={(e) => {
+            onChange={(e) => {
               e.preventDefault();
               handleSearch();
             }}
@@ -90,22 +85,22 @@ export default function ProductGrid({ products, searchParams }) {
             <input
               type="text"
               placeholder="Search..."
-              className="p-2 w-full sm:w-auto border border-gray-300 rounded text-gray-700"
+              className="p-2 border border-gray-300 rounded text-gray-700"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Direct change here
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <select
-            className="p-2 border-2 border-gray-300 rounded text-black w-full sm:w-auto"
+            className="p-2 border-2 border-gray-300 rounded text-black"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
           >
-            <option value="">Default Sort</option>
+            <option value="default">Default Sort</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
           </select>
           <select
-            className="p-2 border-2 border-gray-300 rounded text-black w-full sm:w-auto"
+            className="p-2 border-2 border-gray-300 rounded text-black"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
@@ -117,9 +112,10 @@ export default function ProductGrid({ products, searchParams }) {
             ))}
           </select>
         </div>
+        {/* Reset Button */}
         {hasFilters && (
           <button
-            className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition w-full sm:w-auto"
+            className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-600 transition"
             onClick={handleReset}
           >
             Reset Filters
@@ -127,8 +123,9 @@ export default function ProductGrid({ products, searchParams }) {
         )}
       </div>
 
+      {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {products.length > 0 ? (
             products.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -165,9 +162,10 @@ function ProductCard({ product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/products/${product.id}`} className="relative w-full h-56 sm:h-64 md:h-72 flex items-center justify-center bg-gray-100">
+      <Link href={`/products/${product.id}`} className="relative w-full h-64 flex items-center justify-center bg-gray-100">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
+            {/* Loading spinner */}
             <svg
               className="animate-spin h-8 w-8 text-gray-500"
               xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +201,7 @@ function ProductCard({ product }) {
         <>
           <button
             onClick={handlePreviousImage}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-1 md:p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -211,7 +209,7 @@ function ProductCard({ product }) {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="w-4 h-4 md:w-6 md:h-6 text-gray-800"
+              className="w-6 h-6 text-gray-800"
             >
               <path
                 strokeLinecap="round"
@@ -223,7 +221,7 @@ function ProductCard({ product }) {
 
           <button
             onClick={handleNextImage}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-1 md:p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -231,26 +229,36 @@ function ProductCard({ product }) {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              className="w-4 h-4 md:w-6 md:h-6 text-gray-800"
+              className="w-6 h-6 text-gray-800"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M8.25 19.5l7.5-7.5-7.5-7.5"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
               />
             </svg>
           </button>
         </>
       )}
 
-      <div className="p-4">
-        <Link href={`/products/${product.id}`} className="block text-gray-800 font-semibold mb-2">
-          {product.title}
+      <div className="p-6">
+        <Link href={`/products/${product.id}`}>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+            {product.title}
+          </h2>
         </Link>
-        <p className="text-gray-600 mb-2">{product.price}</p>
-        <button className="text-indigo-600 hover:text-indigo-800 font-medium">
-          Add to Cart
-        </button>
+        <p className="text-xl font-bold text-indigo-600 mb-4">${product.price}</p>
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center rounded bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
+            {product.category}
+          </span>
+          <Link
+            href={`/products/${product.id}`}
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+          >
+            View Details
+          </Link>
+        </div>
       </div>
     </div>
   );
