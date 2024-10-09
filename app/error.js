@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 
 /**
  * ErrorPage component to display an error message and provide options to either try again or go back.
@@ -10,26 +10,29 @@ import Link from 'next/link';
  * @returns {JSX.Element} The rendered component.
  */
 export default function ErrorPage({ message }) {
-  const [firstError, setFirstError] = useState(true); // State to track if it's the first error
+  const [firstError, setFirstError] = useState(true);
 
-  /**
-   * Effect to check if an error has occurred before and set state accordingly.
-   * Runs only once when the component is mounted.
-   */
   useEffect(() => {
-    const errorOccurredBefore = sessionStorage.getItem('errorOccurred');
-    if (errorOccurredBefore) {
-      setFirstError(false); // If an error has occurred before, hide the "Try Again" button
-    } else {
-      sessionStorage.setItem('errorOccurred', 'true'); // Set the error occurrence
+    if (typeof window !== 'undefined') {
+      const errorOccurredBefore = sessionStorage.getItem('errorOccurred');
+      if (errorOccurredBefore) {
+        setFirstError(false);
+      } else {
+        sessionStorage.setItem('errorOccurred', 'true');
+      }
     }
   }, []);
 
-  /**
-   * Reloads the page to attempt to fetch the data again.
-   */
   const handleTryAgain = () => {
-    window.location.reload(); // Reload the page to try fetching the data again
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
+
+  const handleBackToHome = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
   return (
@@ -37,20 +40,22 @@ export default function ErrorPage({ message }) {
       <h1 className="text-4xl font-bold text-red-500 mb-4">Oops! Something went wrong 😵</h1>
       <p className="text-lg text-gray-700 mb-6">{message || "We couldn't fetch the products."}</p>
       
-      <img
-        className="w-64 mb-6"
-        src="https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif"
-        alt="Error gif"
-      />
+      <div className="w-64 h-64 relative mb-6">
+        <Image
+          src="/api/placeholder/256/256"
+          alt="Error gif"
+          layout="fill"
+          objectFit="contain"
+        />
+      </div>
       
-      {/* Back to Previous Page Button */}
-      <Link href="/" passHref className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4">
-        
-          Back to Home Page
-        
-      </Link>
+      <button 
+        onClick={handleBackToHome}
+        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4"
+      >
+        Back to Home Page
+      </button>
 
-      {/* Try Again Button (Visible only if it's the first error) */}
       {firstError && (
         <button
           onClick={handleTryAgain}
