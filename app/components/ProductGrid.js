@@ -18,13 +18,14 @@ export default function ProductGrid({ products, searchParams }) {
    * @throws {Error} Throws an error if the fetch request fails.
    */
   async function fetchCategories() {
-    const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
+    const response = await fetch('http://localhost:3000/api/categories');
     
     if (!response.ok) {
       throw new Error('Failed to fetch categories');
     }
     
-    return response.json();
+    const data = await response.json();
+    return data[0].categories; // Extract the categories array from the response
   }
 
   // Function to handle search
@@ -123,7 +124,9 @@ export default function ProductGrid({ products, searchParams }) {
             <option value="">All Categories</option>
             {categories.map((category) => (
               <option key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
+                {typeof category === 'string'
+                  ? category.charAt(0).toUpperCase() + category.slice(1)
+                  : category}
               </option>
             ))}
           </select>
