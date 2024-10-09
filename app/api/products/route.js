@@ -11,7 +11,7 @@ export async function GET(req) {
     const pageSize = parseInt(searchParams.get('limit') || '20', 10);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
-    const sortBy = searchParams.get('sortBy') || 'price';
+    const sortBy = searchParams.get('sortBy') || 'id';
     const order = searchParams.get('order') || 'asc';
 
     let productsQuery = collection(db, 'products');

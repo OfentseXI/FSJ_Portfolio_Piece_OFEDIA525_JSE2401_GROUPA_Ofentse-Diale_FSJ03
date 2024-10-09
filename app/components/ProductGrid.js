@@ -9,53 +9,60 @@ export default function ProductGrid({ products, searchParams }) {
   const [sortOption, setSortOption] = useState(searchParams.sortBy ? `${searchParams.sortBy}-${searchParams.order}` : '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
   const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
+  const [error, setError] = useState(null); // Error state for categories
   const [hasFilters, setHasFilters] = useState(false);
 
+  // Fetch categories from the API
   async function fetchCategories() {
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch('/api/categories'); // Replace with your actual endpoint
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
       const data = await response.json();
-      return data[0].categories;
+      setCategories(data.categories[0].categories); // Adjusted to match the API response structure
     } catch (error) {
       console.error('Error fetching categories:', error);
-      return [];
+      setError(error.message); // Set error message if fetch fails
+    } finally {
+      setLoadingCategories(false); // Set loading to false when fetch is complete
     }
   }
 
+  // Handle search
   const handleSearch = () => {
     const params = new URLSearchParams(searchParams);
     if (searchTerm) {
-      params.set("search", searchTerm);
+      params.set('search', searchTerm);
     } else {
-      params.delete("search");
+      params.delete('search');
     }
-    params.set("page", "1");
+    params.set('page', '1');
     router.push(`/?${params.toString()}`);
   };
 
   useEffect(() => {
-    fetchCategories().then(setCategories);
+    fetchCategories(); // Fetch categories on component load
   }, []);
 
+  // Handle filter and sort
   const handleFilterSort = () => {
     const params = new URLSearchParams(searchParams);
     if (categoryFilter) {
-      params.set("category", categoryFilter);
+      params.set('category', categoryFilter);
     } else {
-      params.delete("category");
+      params.delete('category');
     }
     if (sortOption) {
-      const [sortBy, order] = sortOption.split("-");
-      params.set("sortBy", sortBy);
-      params.set("order", order);
+      const [sortBy, order] = sortOption.split('-');
+      params.set('sortBy', sortBy);
+      params.set('order', order);
     } else {
-      params.delete("sortBy");
-      params.delete("order");
+      params.delete('sortBy');
+      params.delete('order');
     }
-    params.set("page", "1");
+    params.set('page', '1');
     router.push(`/?${params.toString()}`);
   };
 
@@ -100,11 +107,17 @@ export default function ProductGrid({ products, searchParams }) {
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </option>
-            ))}
+            {loadingCategories ? (
+              <option>Loading categories...</option> // Show loading state for categories
+            ) : error ? (
+              <option>Error loading categories</option> // Show error state if any
+            ) : (
+              categories.map((category) => (
+                <option key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))
+            )}
           </select>
         </div>
         {hasFilters && (
