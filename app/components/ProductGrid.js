@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { collection, getDocs } from "firebase/firestore"; 
+import { db } from "../api/products/firebaseConfig"; 
 
 export default function ProductGrid({ products, searchParams }) {
   const router = useRouter();
@@ -11,12 +13,12 @@ export default function ProductGrid({ products, searchParams }) {
   const [categories, setCategories] = useState([]);
   const [hasFilters, setHasFilters] = useState(false);
 
+  // Function to fetch categories from Firestore
   async function fetchCategories() {
-    const response = await fetch('https://next-ecommerce-api.vercel.app/categories');
-    if (!response.ok) {
-      throw new Error('Failed to fetch categories');
-    }
-    return response.json();
+    const categoriesCollection = collection(db, 'categories');
+    const categorySnapshot = await getDocs(categoriesCollection);
+    const categoryList = categorySnapshot.docs.map(doc => doc.data().name); // Assuming categories have a 'name' field
+    return categoryList;
   }
 
   const handleSearch = () => {
@@ -78,8 +80,9 @@ export default function ProductGrid({ products, searchParams }) {
     <div className="bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0">
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+          {/* Removed debounce logic, now search triggers onChange directly */}
           <form
-            onChange={(e) => {
+            onSubmit={(e) => {
               e.preventDefault();
               handleSearch();
             }}
@@ -89,7 +92,7 @@ export default function ProductGrid({ products, searchParams }) {
               placeholder="Search..."
               className="p-2 w-full sm:w-auto border border-gray-300 rounded text-gray-700"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)} // Direct change here
             />
           </form>
           <select
@@ -233,31 +236,21 @@ function ProductCard({ product }) {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                d="M8.25 19.5l7.5-7.5-7.5-7.5"
               />
             </svg>
           </button>
         </>
       )}
 
-<div className="p-6">
-        <Link href={`/products/${product.id}`}>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-            {product.title}
-          </h2>
+      <div className="p-4">
+        <Link href={`/products/${product.id}`} className="block text-gray-800 font-semibold mb-2">
+          {product.title}
         </Link>
-        <p className="text-xl font-bold text-indigo-600 mb-4">${product.price}</p>
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center rounded bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
-            {product.category}
-          </span>
-          <Link
-            href={`/products/${product.id}`}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
-          >
-            View Details
-          </Link>
-        </div>      
+        <p className="text-gray-600 mb-2">{product.price}</p>
+        <button className="text-indigo-600 hover:text-indigo-800 font-medium">
+          Add to Cart
+        </button>
       </div>
     </div>
   );
