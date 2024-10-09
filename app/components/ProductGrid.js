@@ -2,7 +2,24 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchCategories } from '../api/categories/route';
+// import { fetchCategories } from '../api/categories/route';
+
+export async function fetchCategories() {
+
+  const res = await fetch(
+    `http://localhost:3000/api/categories`,
+    {
+      cache: "force-cache",
+      next: { revalidate: 1800 },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products.");
+  }
+
+  return res.json();
+}
 
 export default function ProductGrid({ products, searchParams }) {
   const router = useRouter();
@@ -24,7 +41,7 @@ export default function ProductGrid({ products, searchParams }) {
     loadCategories();
   }, []);
 
-  // Function to handle search
+  // Function to handle search and reset pagination to page 1
   const handleSearch = () => {
     const params = new URLSearchParams(searchParams);
     if (searchTerm) {
@@ -36,26 +53,34 @@ export default function ProductGrid({ products, searchParams }) {
     router.push(`/?${params.toString()}`);
   };
 
-  // Function to handle sorting and filtering
+  // Function to handle filtering and sorting
   const handleFilterSort = () => {
     const params = new URLSearchParams(searchParams);
+
+    // Apply category filter
     if (categoryFilter) {
       params.set("category", categoryFilter);
     } else {
       params.delete("category");
     }
-    if (sortOption) {
+
+    // Apply sorting
+    if (sortOption && sortOption !== "default") {
       const [sortBy, order] = sortOption.split("-");
       params.set("sortBy", sortBy);
       params.set("order", order);
     } else {
+      // Default order when no sort is applied
       params.delete("sortBy");
       params.delete("order");
     }
+
+    // Reset to first page after applying filters or sort
+    params.set("page", "1");
     router.push(`/?${params.toString()}`);
   };
 
-  // Update the hasFilters state when filters or sort options change
+  // Update hasFilters state when filters or sort options change
   useEffect(() => {
     const isFiltered = sortOption || categoryFilter;
     setHasFilters(!!isFiltered); // Set to true if any option is active
@@ -77,7 +102,7 @@ export default function ProductGrid({ products, searchParams }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
         <div className="flex space-x-4">
           <form
-            onChange={(e) => {
+            onSubmit={(e) => {
               e.preventDefault();
               handleSearch();
             }}
@@ -241,24 +266,11 @@ function ProductCard({ product }) {
         </>
       )}
 
-      <div className="p-6">
-        <Link href={`/products/${product.id}`}>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-            {product.title}
-          </h2>
-        </Link>
-        <p className="text-xl font-bold text-indigo-600 mb-4">${product.price}</p>
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center rounded bg-indigo-100 px-3 py-0.5 text-sm font-medium text-indigo-800">
-            {product.category}
-          </span>
-          <Link
-            href={`/products/${product.id}`}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
-          >
-            View Details
-          </Link>
-        </div>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold">
+          <Link href={`/products/${product.id}`}>{product.title}</Link>
+        </h3>
+        <p className="mt-2 text-gray-500">${product.price}</p>
       </div>
     </div>
   );

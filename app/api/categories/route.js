@@ -1,17 +1,23 @@
-import { collection, query, getDocs, orderBy } from "firebase/firestore";
-import { db } from '../firebaseConfig';
+import { NextResponse } from "next/server";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
-/**
- * Fetch all categories from Firestore.
- * @returns {Promise<string[]>} A promise that resolves to an array of category names.
- */
-export async function fetchCategories() {
+export async function GET() {
   try {
-    const categoriesQuery = query(collection(db, 'categories'), orderBy('name'));
-    const snapshot = await getDocs(categoriesQuery);
-    return snapshot.docs.map(doc => doc.data().name);
+    const categoriesRef = collection(db, 'categories');
+
+    const snapshot = await getDocs(categoriesRef);
+
+    const categories = snapshot.docs.map((doc) => ({
+    //   id: doc.id,
+      ...doc.data(),
+    }));
+
+    return new Response(JSON.stringify(categories), {status: 200})
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
+    return NextResponse.json(
+      {error: "Failed to fetch categories", details: error.message},
+      {status: 500}
+    )
   }
 }
