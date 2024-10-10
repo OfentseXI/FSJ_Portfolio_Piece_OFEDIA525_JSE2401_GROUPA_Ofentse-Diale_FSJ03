@@ -3,18 +3,11 @@
 import { useState, useEffect } from 'react';
 import Loading from '@/app/loading';
 import Link from 'next/link';
-import ErrorPage from '@/app/error'; 
-
-async function fetchProductDetails(id) {
-  const response = await fetch(`https://next-ecommerce-api.vercel.app/products/${id}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch product details');
-  }
-  return response.json();
-}
+import ErrorPage from '@/app/error';
 
 export default function ProductDetails({ params }) {
   const { id } = params;
+  const paddedId = id.toString().padStart(3,"0");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,12 +16,30 @@ export default function ProductDetails({ params }) {
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('');
 
+  // Function to fetch product by ID (integrated directly here)
+  async function fetchProductById(id) {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    try {
+      const response = await fetch(`${baseUrl}/api/products/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const productData = await response.json();
+      return productData;
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      throw error;
+    }
+  }
+
   useEffect(() => {
     const loadProductDetails = async () => {
       setLoading(true);
       setError(null);
       try {
-        const productData = await fetchProductDetails(id);
+        const productData = await fetchProductById(paddedId); // Use the integrated fetch function here
         setProduct(productData);
       } catch (err) {
         setError('Failed to load product details. Please try again later.');
@@ -36,8 +47,9 @@ export default function ProductDetails({ params }) {
         setLoading(false);
       }
     };
+
     loadProductDetails();
-  }, [id]);
+  }, [paddedId]);
 
   if (loading) {
     return <Loading />;
@@ -46,7 +58,6 @@ export default function ProductDetails({ params }) {
   if (error) {
     return <ErrorPage message={error} />;
   }
-
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
