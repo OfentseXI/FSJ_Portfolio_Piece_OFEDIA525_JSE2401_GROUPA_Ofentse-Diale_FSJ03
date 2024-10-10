@@ -16,6 +16,9 @@ export default function ProductDetails({ params }) {
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('');
 
+  // New state for review form
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
   // Function to fetch product by ID (integrated directly here)
   async function fetchProductById(id) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -99,6 +102,36 @@ export default function ProductDetails({ params }) {
       }
       return 0; // No sorting if no criteria is selected
     });
+  };
+
+  const handleAddReview = async () => {
+    try {
+      const response = await fetch(`/api/reviews/${paddedId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating,
+          comment,
+          reviewerEmail: 'user@example.com',
+          reviewerName: 'John Doe'
+        }),
+      });
+
+      if (response.ok) {
+        alert('Review added successfully!');
+        // Refresh product details to include the new review
+        const updatedProduct = await fetchProductById(paddedId);
+        setProduct(updatedProduct);
+        // Reset form
+        setRating(0);
+        setComment('');
+      } else {
+        alert('Failed to add review.');
+      }
+    } catch (error) {
+      console.error('Error adding review:', error);
+      alert('An error occurred while adding the review.');
+    }
   };
 
   return (
@@ -299,9 +332,45 @@ export default function ProductDetails({ params }) {
                       </div>
                     ))}
                   </div>
+                  {/* Add Review Form */}
+                  <div className="mt-8 bg-gray-100 p-6 rounded-lg">
+                    <h3 className="text-xl font-semibold mb-4">Add a Review</h3>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rating">
+                        Rating
+                      </label>
+                      <input
+                        type="number"
+                        id="rating"
+                        value={rating}
+                        onChange={(e) => setRating(Number(e.target.value))}
+                        min="1"
+                        max="5"
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="comment">
+                        Comment
+                      </label>
+                      <textarea
+                        id="comment"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
+                      />
+                    </div>
+                    <button
+                      onClick={handleAddReview}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    >
+                      Submit Review
+                    </button>
+                  </div>
                 </>
               )}
             </div>
+            
              {/* Back to Products Button */}
              <Link href="/" className="mt-6 inline-block text-indigo-600 hover:text-indigo-800">
                     &larr; Back to Products
