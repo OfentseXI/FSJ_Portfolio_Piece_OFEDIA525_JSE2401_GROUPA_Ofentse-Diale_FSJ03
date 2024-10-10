@@ -18,19 +18,24 @@ async function fetchProducts({
   limit = 20,
   search = '',
   category = '',
-  sortBy = 'price',
+  sortBy = 'id',
   order = 'asc'
-} = {}) {
-  const queryParams = new URLSearchParams({
-    limit,
-    page,
-    sortBy,
-    order,
-    ...(search && { search }),
-    ...(category && { category })
-  });
+  } = {}) {
 
-  const response = await fetch(`http://localhost:3000/api/products?${queryParams}`);
+
+   // Build individual query strings
+   const limitQuery = `limit=${limit}`;
+   const sortByQuery = `sortBy=${sortBy}`;
+   const orderQuery = `order=${order}`;
+   const searchQuery = search ? `search=${encodeURIComponent(search)}` : '';
+   const categoryQuery = category ? `category=${encodeURIComponent(category)}` : '';
+ 
+   // Combine the query strings into a single string
+   const queryString = [limitQuery, sortByQuery, orderQuery, searchQuery, categoryQuery]
+     .filter(Boolean)
+     .join('&');
+
+  const response = await fetch(`http://localhost:3000/api/products?${queryString}`);
 
   if (!response.ok) {
     throw new Error('Failed to fetch products');
@@ -38,27 +43,17 @@ async function fetchProducts({
 
   const { products } = await response.json();
   return products; // Return only the array of products
-}
+  }
 
-export default async function ProductsPage({ searchParams }) {
-  // Destructure searchParams with defaults
-  const {
-    page = 1,
-    search = '',
-    category = '',
-    sortBy = 'price',
-    order = 'asc'
-  } = searchParams;
+  export default async function ProductsPage({ searchParams }) {
+    const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+    const search = searchParams.search || '';  // Handle search parameter
+    const category = searchParams.category || '';  // Handle category parameter
+    const sortBy = searchParams.sortBy || '';  // Handle sort parameter
+    const order = searchParams.order || '';  // Handle order parameter
 
   try {
-    const products = await fetchProducts({
-      page: parseInt(page, 10),
-      limit: 20,
-      search,
-      category,
-      sortBy,
-      order
-    });
+    const products = await fetchProducts({ page:parseInt(page, 10), search, category, sortBy, order});
 
     return (
       <div>
@@ -73,7 +68,7 @@ export default async function ProductsPage({ searchParams }) {
       </div>
     );
   } catch (err) {
-    console.error(err);
-    return <div>Error loading products...</div>;
+    // Handle errors (displaying a message or redirecting)
+    throw err; // Show 404 page if data fetching fails
   }
 }

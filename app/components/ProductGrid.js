@@ -16,7 +16,7 @@ export default function ProductGrid({ products, searchParams }) {
   // Fetch categories from the API
   async function fetchCategories() {
     try {
-      const response = await fetch('/api/categories'); // Replace with your actual endpoint
+      const response = await fetch('http://localhost:3000/api/categories'); // Replace with your actual endpoint
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
@@ -43,7 +43,7 @@ export default function ProductGrid({ products, searchParams }) {
   };
 
   useEffect(() => {
-    fetchCategories(); // Fetch categories on component load
+    fetchCategories();
   }, []);
 
   // Handle filter and sort
@@ -62,7 +62,6 @@ export default function ProductGrid({ products, searchParams }) {
       params.delete('sortBy');
       params.delete('order');
     }
-    params.set('page', '1');
     router.push(`/?${params.toString()}`);
   };
 
@@ -73,17 +72,22 @@ export default function ProductGrid({ products, searchParams }) {
   }, [categoryFilter, sortOption]);
 
   const handleReset = () => {
-    setSearchTerm('');
     setSortOption('');
     setCategoryFilter('');
-    router.push('/?page=1');
+    const params = new URLSearchParams();
+    params.set("page", "1");  // Reset to the first page
+    router.push(`/?${params.toString()}`);
   };
 
   return (
     <div className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex justify-between">
         <div className="flex space-x-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+          <form 
+            onChange={(e) => { e.preventDefault(); 
+            handleSearch(); 
+            }}
+          >
             <input
               type="text"
               placeholder="Search..."
@@ -107,17 +111,12 @@ export default function ProductGrid({ products, searchParams }) {
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="">All Categories</option>
-            {loadingCategories ? (
-              <option>Loading categories...</option> // Show loading state for categories
-            ) : error ? (
-              <option>Error loading categories</option> // Show error state if any
-            ) : (
-              categories.map((category) => (
+            {categories.map((category) => (
                 <option key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </option>
               ))
-            )}
+            }
           </select>
         </div>
         {hasFilters && (
