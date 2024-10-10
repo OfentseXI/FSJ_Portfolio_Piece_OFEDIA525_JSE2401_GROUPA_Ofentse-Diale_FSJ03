@@ -1,32 +1,27 @@
-import { NextResponse } from "next/server";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { NextResponse } from 'next/server';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
 
-export async function GET(request, { params }) {
-  const id = params.id;
-
+export async function GET(req, { params }) {
   try {
-    const productDetailsRef = doc(db, 'productDetails', id);
-    const productDetailsSnap = await getDoc(productDetailsRef);
+    const { id } = params;
 
-    if (!productDetailsSnap.exists()) {
-      return NextResponse.json(
-        { error: "Product details not found" },
-        { status: 404 }
-      );
+    // Fetch the document from Firestore by ID
+    const docRef = doc(db, 'products', id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const productData = {
+        id: docSnap.id,
+        ...docSnap.data(),
+      };
+      
+      return NextResponse.json(productData);
+    } else {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
-
-    const productDetails = {
-      id: productDetailsSnap.id,
-      ...productDetailsSnap.data(),
-    };
-
-    return NextResponse.json({ productDetails });
   } catch (error) {
-    console.error('Failed to fetch product details:', error);
-    return NextResponse.json(
-      { error: "Failed to fetch product details" },
-      { status: 500 }
-    );
+    console.error('Error fetching product by ID:', error);
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
