@@ -46,6 +46,7 @@ export default function ErrorPage({ message }) {
         src="https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif"
         alt="Error gif"
       />
+      </div>
       
       <button 
         onClick={handleBackToHome}
