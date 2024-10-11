@@ -9,26 +9,29 @@ export default function ProductGrid({ products, searchParams }) {
   const [sortOption, setSortOption] = useState(searchParams.sortBy ? `${searchParams.sortBy}-${searchParams.order}` : '');
   const [categoryFilter, setCategoryFilter] = useState(searchParams.category || '');
   const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true); // Loading state for categories
-  const [error, setError] = useState(null); // Error state for categories
   const [hasFilters, setHasFilters] = useState(false);
 
   // Fetch categories from the API
   async function fetchCategories() {
     try {
-      const response = await fetch('http://localhost:3000/api/categories'); // Replace with your actual endpoint
+      const response = await fetch('http://localhost:3000/api/categories');
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
       const data = await response.json();
-      setCategories(data.categories[0].categories); // Adjusted to match the API response structure
+      return data.categories[0].categories; // Return the categories properly
     } catch (error) {
       console.error('Error fetching categories:', error);
-      setError(error.message); // Set error message if fetch fails
-    } finally {
-      setLoadingCategories(false); // Set loading to false when fetch is complete
     }
   }
+
+  useEffect(() => {
+    async function loadCategories() {
+      const fetchedCategories = await fetchCategories();
+      setCategories(fetchedCategories || []);  // Set the categories if fetched, otherwise empty array
+    }
+    loadCategories();
+  }, []);
 
   // Handle search
   const handleSearch = () => {
