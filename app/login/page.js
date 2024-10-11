@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../api/firebaseConfig'; 
+import { auth } from '../../firebaseConfig'; 
 import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {

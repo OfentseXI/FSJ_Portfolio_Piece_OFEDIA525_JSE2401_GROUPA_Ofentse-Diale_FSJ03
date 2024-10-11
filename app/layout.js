@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from './api/firebaseConfig'; // Adjust this path based on your file structure
+import { auth } from '../firebaseConfig'; // Adjust this path based on your file structure
 import { useRouter } from 'next/navigation';
 
 export default function RootLayout({ children }) {

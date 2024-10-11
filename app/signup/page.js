@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../api/firebaseConfig'; // Adjust path to your `firebase.js`
+import { auth } from '../../firebaseConfig'; // Adjust path to your `firebase.js`
 import { useRouter } from 'next/navigation';
 
 const SignUpPage = () => {

@@ -1,37 +1,12 @@
+import { getFirestore, FieldValue} from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { verifyIdToken, initFirebaseAdmin } from '../../../../firebaseAdmin'; // Import initFirebaseAdmin
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '../../../../../firebaseConfig';
+import { verifyIdToken } from '../../../../../firebaseAdmin'; // Assuming Firebase Admin SDK is set up here
 
-// Initialize Firebase Admin SDK
-initFirebaseAdmin(); // Call the function here
+initFirebaseAdmin(); // Initialize Firebase Admin SDK
 
 const db = getFirestore();
-
-
-export async function GET(req, { params }) {
-  try {
-    const { id } = params;
-
-    // Fetch the document from Firestore by ID
-    const docRef = doc(db, 'products', id);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const productData = {
-        id: docSnap.id,
-        ...docSnap.data(),
-      };
-      
-      return NextResponse.json(productData);
-    } else {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-  } catch (error) {
-    console.error('Error fetching product by ID:', error);
-    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
-  }
-}
 
 
 // ADD Review (POST request)

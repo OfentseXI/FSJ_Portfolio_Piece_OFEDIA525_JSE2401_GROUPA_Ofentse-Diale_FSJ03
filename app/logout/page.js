@@ -1,6 +1,6 @@
 'use client';
 import { signOut } from 'firebase/auth';
-import { auth } from '../api/firebaseConfig';
+import { auth } from '../../firebaseConfig';
 import { useRouter } from 'next/navigation';
 
 const SignOutButton = () => {
