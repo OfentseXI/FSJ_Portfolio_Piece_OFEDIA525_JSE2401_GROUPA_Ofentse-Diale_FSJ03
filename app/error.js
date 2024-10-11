@@ -41,13 +41,11 @@ export default function ErrorPage({ message }) {
       <p className="text-lg text-gray-700 mb-6">{message || "We couldn't fetch the products."}</p>
       
       <div className="w-64 h-64 relative mb-6">
-        <Image
-          src="/api/placeholder/256/256"
-          alt="Error gif"
-          layout="fill"
-          objectFit="contain"
-        />
-      </div>
+      <img
+        className="w-64 mb-6"
+        src="https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif"
+        alt="Error gif"
+      />
       
       <button 
         onClick={handleBackToHome}
