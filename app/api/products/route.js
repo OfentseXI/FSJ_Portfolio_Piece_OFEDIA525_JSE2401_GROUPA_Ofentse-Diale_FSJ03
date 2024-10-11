@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { collection, query, getDocs, orderBy, where, limit, startAfter, getCountFromServer } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db } from "../../../firebaseConfig";
 import Fuse from 'fuse.js';
 
 export async function GET(req) {

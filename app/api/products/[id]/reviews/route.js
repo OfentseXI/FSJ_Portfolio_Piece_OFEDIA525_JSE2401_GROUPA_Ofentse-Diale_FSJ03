@@ -1,6 +1,6 @@
 import { getFirestore, FieldValue} from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../../../firebaseConfig';
 import { verifyIdToken } from '../../../../../firebaseAdmin'; // Assuming Firebase Admin SDK is set up here
 

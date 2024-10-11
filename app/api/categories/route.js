@@ -9,7 +9,7 @@ export async function GET() {
 
     const categories = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      // ...doc.data(),
     }));
 
     return NextResponse.json({ categories });
